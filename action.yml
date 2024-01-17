@@ -1,4 +1,4 @@
-name: "Flutter Auto Tag"
+name: "Flutter Repository Tagger"
 description: "Automatically bumps the version in the pubspec.yaml"
 author: "Enes Karaosman"
 branding:
