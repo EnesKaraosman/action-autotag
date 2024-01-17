@@ -62,10 +62,8 @@ function loadPubspec() {
     core.debug(` Working Directory: ${process.env.GITHUB_WORKSPACE}:\n${dir}`);
 
     if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
-        if (!process.env.hasOwnProperty('INPUT_GITHUB_TOKEN')) {
-            core.setFailed('Invalid or missing GITHUB_TOKEN.');
-            return
-        }
+        core.setFailed('Invalid or missing GITHUB_TOKEN.');
+        return
     }
 
     const pkg_root = core.getInput('package_root', { required: false });
@@ -92,13 +90,15 @@ async function run() {
 
         core.setOutput('version', version);
         core.debug(` Detected version ${version}`);
+        const token = core.getInput('GITHUB_TOKEN');
 
-        const octokit = new github.getOctokit(process.env.GITHUB_TOKEN || process.env.INPUT_GITHUB_TOKEN);
+        // Use github.getOctokit to get an authenticated Octokit instance
+        const octokit = github.getOctokit(token);
 
         // Get owner and repo from context of payload that triggered the action
         const { owner, repo } = github.context.repo;
 
-        // // Check for existing tag
+        // Check for existing tag
         let tags = await getExistingTag(octokit, owner, repo);
 
         const tagPrefix = core.getInput('tag_prefix', { required: false });
@@ -109,7 +109,7 @@ async function run() {
             return `${tagPrefix}${version}${tagSuffix}`
         };
 
-        // Check for existance of tag and abort (short circuit) if it already exists.
+        // Check for existence of tag and abort (short circuit) if it already exists.
         for (let tag of tags.data) {
             if (tag.name === getTagName(version)) {
                 core.warning(`"${tag.name.trim()}" tag already exists.` + os.EOL);
@@ -128,7 +128,8 @@ async function run() {
         try {
             tagMsg = tagMsg.trim().length > 0 ? tagMsg : `Version ${version}`;
 
-            newTag = await octokit.git.createTag({
+            // Use octokit directly to access createTag
+            newTag = await octokit.rest.git.createTag({
                 owner,
                 repo,
                 tag: tagName,
@@ -145,7 +146,7 @@ async function run() {
 
         let newReference;
         try {
-            newReference = await octokit.git.createRef({
+            newReference = await octokit.rest.git.createRef({
                 owner,
                 repo,
                 ref: `refs/tags/${newTag.data.tag}`,
