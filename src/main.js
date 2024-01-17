@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const {GitHub, context} = require('@actions/github');
+const { GitHub, context } = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -38,7 +38,7 @@ async function setTagMessage(tagMsg, tags, github, owner, repo, changelogStructu
 }
 
 async function getExistingTag(github, owner, repo) {
-    let tags = {data: []};
+    let tags = { data: [] };
     try {
         tags = await github.repos.listTags({
             owner,
@@ -53,7 +53,7 @@ async function getExistingTag(github, owner, repo) {
 
 function loadPubspec() {
     const dir = fs
-        .readdirSync(path.resolve(process.env.GITHUB_WORKSPACE), {withFileTypes: true})
+        .readdirSync(path.resolve(process.env.GITHUB_WORKSPACE), { withFileTypes: true })
         .map(entry => {
             return `${entry.isDirectory() ? '> ' : '  - '}${entry.name}`
         })
@@ -68,7 +68,7 @@ function loadPubspec() {
         }
     }
 
-    const pkg_root = core.getInput('package_root', {required: false});
+    const pkg_root = core.getInput('package_root', { required: false });
     const pkgfile = path.join(process.env.GITHUB_WORKSPACE, pkg_root, 'pubspec.yaml');
     if (!fs.existsSync(pkgfile)) {
         core.setFailed('pubspec.yaml does not exist.');
@@ -87,7 +87,9 @@ async function run() {
             .join('\n -> ')}`);
 
         let pkg = loadPubspec();
-        let version = pkg.version.split('\+')[0];
+        const includeBuildNumber = core.getInput('include_build_number', { required: false }) || true;
+        let version = includeBuildNumber ? pkg.version : pkg.version.split('\+')[0];
+
         core.setOutput('version', version);
         core.debug(` Detected version ${version}`);
 
@@ -95,14 +97,14 @@ async function run() {
         const github = new GitHub(process.env.GITHUB_TOKEN || process.env.INPUT_GITHUB_TOKEN);
 
         // Get owner and repo from context of payload that triggered the action
-        const {owner, repo} = context.repo;
+        const { owner, repo } = context.repo;
 
         // // Check for existing tag
         let tags = await getExistingTag(github, owner, repo);
 
-        const tagPrefix = core.getInput('tag_prefix', {required: false});
-        const tagSuffix = core.getInput('tag_suffix', {required: false});
-        const changelogStructure = core.getInput('changelog_structure', {required: false});
+        const tagPrefix = core.getInput('tag_prefix', { required: false });
+        const tagSuffix = core.getInput('tag_suffix', { required: false });
+        const changelogStructure = core.getInput('changelog_structure', { required: false });
 
         const getTagName = version => {
             return `${tagPrefix}${version}${tagSuffix}`
@@ -120,7 +122,7 @@ async function run() {
         // Create the new tag name
         const tagName = getTagName(version);
 
-        let tagMsg = core.getInput('tag_message', {required: false}).trim();
+        let tagMsg = core.getInput('tag_message', { required: false }).trim();
         tagMsg = await setTagMessage(tagMsg, tags, github, owner, repo, changelogStructure, tagName);
 
         let newTag;

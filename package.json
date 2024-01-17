@@ -1,23 +1,23 @@
 {
   "name": "fluttertag",
-  "version": "2.0.3",
+  "version": "4.0.0",
   "description": "Automatically create a tag whenever the version changes in pubspec.yaml",
   "main": "src/main.js",
   "directories": {
     "lib": "src"
   },
   "dependencies": {
-    "@actions/core": "^1.2.2",
-    "@actions/github": "^2.1.0",
-    "core-util-is": "^1.0.2",
-    "js-yaml": "^4.0.0"
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "core-util-is": "^1.0.3",
+    "js-yaml": "^4.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jacopo1395/action-autotag.git"
+    "url": "git+https://github.com/eneskaraosman/action-autotag.git"
   },
   "keywords": [
     "auto",
@@ -28,10 +28,10 @@
     "dart",
     "version"
   ],
-  "author": "Jacopo Carlini",
+  "author": "Enes Karaosman",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jacopo1395/action-autotag/issues"
+    "url": "https://github.com/eneskaraosman/action-autotag/issues"
   },
-  "homepage": "https://github.com/jacopo1395/action-autotag#readme"
+  "homepage": "https://github.com/eneskaraosman/action-autotag#readme"
 }

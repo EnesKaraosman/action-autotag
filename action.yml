@@ -1,6 +1,6 @@
 name: "Flutter Auto Tag"
 description: "Automatically bumps the version in the pubspec.yaml"
-author: "Jacopo Carlini"
+author: "Enes Karaosman"
 branding:
   icon: "tag"
   color: "blue"
@@ -26,6 +26,9 @@ inputs:
     required: false
   version:
     description: Explicitly set the version here instead of automatically detecting from `pubspec.yaml`. Useful for non-Flutter projects where version may be output by a previous action.
+    required: false  
+  include_build_number:
+    description: By default, the build number (the number after +) is included to the tag.
     required: false
 outputs:
   tagname:
