@@ -54,17 +54,10 @@ async function getExistingTag(octokit, owner, repo) {
 function loadPubspec() {
     const dir = fs
         .readdirSync(path.resolve(process.env.GITHUB_WORKSPACE), { withFileTypes: true })
-        .map(entry => {
-            return `${entry.isDirectory() ? '> ' : '  - '}${entry.name}`
-        })
+        .map(entry => `${entry.isDirectory() ? '> ' : '  - '}${entry.name}`)
         .join('\n');
 
     core.debug(` Working Directory: ${process.env.GITHUB_WORKSPACE}:\n${dir}`);
-
-    if (!process.env.hasOwnProperty('GITHUB_TOKEN')) {
-        core.setFailed('Invalid or missing GITHUB_TOKEN.');
-        return
-    }
 
     const pkg_root = core.getInput('package_root', { required: false });
     const pkgfile = path.join(process.env.GITHUB_WORKSPACE, pkg_root, 'pubspec.yaml');
@@ -74,8 +67,8 @@ function loadPubspec() {
     }
 
     let fileContents = fs.readFileSync(pkgfile, 'utf8');
+    
     return yaml.load(fileContents);
-
 }
 
 async function run() {
