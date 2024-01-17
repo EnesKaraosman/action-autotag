@@ -26,11 +26,11 @@ on:
       - main
 
 jobs:
-  build:
+  create_tag:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: eneskaraosman/action-autotag@stable
+    - uses: eneskaraosman/action-autotag
       with:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 ```
@@ -41,7 +41,7 @@ This **order** is important!
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: eneskaraosman/action-autotag@stable
+- uses: eneskaraosman/action-autotag
 ```
 
 > If the repository is not checked out first, the autotagger cannot find the pubspec.yaml file.
@@ -73,7 +73,7 @@ There are several options to customize how the tag is created.
         package_root: "/path/to/subdirectory"
     ```
 
-1. `tag_prefix`
+2. `tag_prefix`
 
     By default in flutter, the version number is three numbers separated by dots, followed by an optional build number separated by a +, such as `1.2.21+7`. **The optional build number is ignored when the tag is created**. A prefix can be used to add text before the tag name. For example, if `tag_prefix` is set to `v`, then the tag would be labeled as `v1.0.0`.
 
@@ -84,7 +84,7 @@ There are several options to customize how the tag is created.
         tag_prefix: "v"
     ```
 
-1. `tag_suffix`
+3. `tag_suffix`
 
     Text can also be applied to the end of the tag by setting `tag_suffix`. For example, if `tag_suffix` is `(beta)`, the tag would be `1.0.0(beta)`. Please note this example violates semantic versioning and is merely here to illustrate how to add text to the end of a tag name if you _really_ want to.
 
@@ -95,7 +95,7 @@ There are several options to customize how the tag is created.
         tag_suffix: "(beta)"
     ```
 
-1. `tag_message`
+4. `tag_message`
 
     This is the annotated commit message associated with the tag. By default, a
     changelog will be generated from the commits between the latest tag and the new tag (HEAD). Setting this option will override it witha custom message.
@@ -107,7 +107,7 @@ There are several options to customize how the tag is created.
         tag_message: "Custom message goes here."
     ```
 
-1. `changelog_structure`
+5. `changelog_structure`
 
     Provide a custom changelog format when not using `tag_message`.
     This can interpolate strings, supported strings are `{{message}}`, `{{messageHeadline}}`, `{{author}}` and `{{sha}}`.
@@ -120,7 +120,7 @@ There are several options to customize how the tag is created.
         changelog_structure: "**{{messageHeadline}}** {{author}}\n"
     ```
 
-1. `version`
+6. `version`
 
     Explicitly set the version instead of automatically detecting from `pubspec.yaml`.
     Useful for non-Flutter projects where version may be output by a previous action.
@@ -130,6 +130,17 @@ There are several options to customize how the tag is created.
       with:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         version: "${{ steps.previous_step.outputs.version }}"
+    ```
+
+7. `include_build_number`
+
+    `pubspec.yaml` file may contain build number after "+" character. Like `1.5.0+53`. The build number is added to the tag by default, to ignore it set this parameter to false
+
+    ```yaml
+    - uses: eneskaraosman/action-autotag@stable
+      with:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        include_build_number: false
     ```
 
 ## Developer Notes

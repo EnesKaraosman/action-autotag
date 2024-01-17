@@ -42,5 +42,5 @@ outputs:
   version:
     description: The version, as defined in pubspec.yaml or explicitly set in the input.
 runs:
-  using: "node12"
+  using: "node16"
   main: "src/main.js"

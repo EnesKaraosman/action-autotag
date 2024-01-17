@@ -1,17 +1,17 @@
 const core = require('@actions/core');
-const { GitHub, context } = require('@actions/github');
+const github = require('@actions/github');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const yaml = require('js-yaml');
 
-async function setTagMessage(tagMsg, tags, github, owner, repo, changelogStructure, tagName) {
+async function setTagMessage(tagMsg, tags, octokit, owner, repo, changelogStructure, tagName) {
     let latestTag;
     if (tagMsg.length === 0 && tags.data.length > 0) {
         try {
             latestTag = tags.data.shift();
 
-            let changelog = await github.repos.compareCommits({
+            let changelog = await octokit.repos.compareCommits({
                 owner,
                 repo,
                 base: latestTag.name,
@@ -37,10 +37,10 @@ async function setTagMessage(tagMsg, tags, github, owner, repo, changelogStructu
     return tagMsg;
 }
 
-async function getExistingTag(github, owner, repo) {
+async function getExistingTag(octokit, owner, repo) {
     let tags = { data: [] };
     try {
-        tags = await github.repos.listTags({
+        tags = await octokit.repos.listTags({
             owner,
             repo,
             per_page: 100,
@@ -93,14 +93,13 @@ async function run() {
         core.setOutput('version', version);
         core.debug(` Detected version ${version}`);
 
-        // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-        const github = new GitHub(process.env.GITHUB_TOKEN || process.env.INPUT_GITHUB_TOKEN);
+        const octokit = new github.getOctokit(process.env.GITHUB_TOKEN || process.env.INPUT_GITHUB_TOKEN);
 
         // Get owner and repo from context of payload that triggered the action
-        const { owner, repo } = context.repo;
+        const { owner, repo } = github.context.repo;
 
         // // Check for existing tag
-        let tags = await getExistingTag(github, owner, repo);
+        let tags = await getExistingTag(octokit, owner, repo);
 
         const tagPrefix = core.getInput('tag_prefix', { required: false });
         const tagSuffix = core.getInput('tag_suffix', { required: false });
@@ -123,13 +122,13 @@ async function run() {
         const tagName = getTagName(version);
 
         let tagMsg = core.getInput('tag_message', { required: false }).trim();
-        tagMsg = await setTagMessage(tagMsg, tags, github, owner, repo, changelogStructure, tagName);
+        tagMsg = await setTagMessage(tagMsg, tags, octokit, owner, repo, changelogStructure, tagName);
 
         let newTag;
         try {
             tagMsg = tagMsg.trim().length > 0 ? tagMsg : `Version ${version}`;
 
-            newTag = await github.git.createTag({
+            newTag = await octokit.git.createTag({
                 owner,
                 repo,
                 tag: tagName,
@@ -146,7 +145,7 @@ async function run() {
 
         let newReference;
         try {
-            newReference = await github.git.createRef({
+            newReference = await octokit.git.createRef({
                 owner,
                 repo,
                 ref: `refs/tags/${newTag.data.tag}`,
